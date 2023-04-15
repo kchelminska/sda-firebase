@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from "firebase/storage";
 import './../styles/styles.css';
+import {updateDoc, addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -15,7 +16,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-
+const db = getFirestore(app);
 
 
 // ZADANIE PIERWSZE - PRZESYLANIE PLIKU NA CHMURE I WYSWIETLANIE GO W OKNIE PRZEGLADARKI
@@ -289,37 +290,187 @@ const storage = getStorage(app);
 
 // ZADANIE 10 - (7). Utwórz aplikację, która będzie wyświetlała bibliotekę dokumentów. Dokumenty są podzielone na kategorie. W momencie wybrania danej kategorii wyświetlane są dokumenty tylko z podanej kategorii. + METODA DELETE NA BUTTON
 
-const albums = document.getElementById("albums");
-const images = document.getElementById('images');
+// const albums = document.getElementById("albums");
+// const images = document.getElementById('images');
 
-const storageRef = ref(storage);
-listAll(storageRef).then(res => {
-    res.prefixes.forEach(prefix => {
-        const listItem = document.createElement('li');
-        listItem.innerText = prefix.name;
+// const storageRef = ref(storage);
+// listAll(storageRef).then(res => {
+//     res.prefixes.forEach(prefix => {
+//         const listItem = document.createElement('li');
+//         listItem.innerText = prefix.name;
 
-        listItem.addEventListener('click', () =>{
-            listAll(prefix).then(imgRes =>{
-                images.innerHTML = "";
-                imgRes.items.forEach(item => {
-                    const imageItem = document.createElement('li');
-                    imageItem.innerText = item.name;
-                    images.appendChild(imageItem);
+//         listItem.addEventListener('click', () =>{
+//             listAll(prefix).then(imgRes =>{
+//                 images.innerHTML = "";
+//                 imgRes.items.forEach(item => {
+//                     const imageItem = document.createElement('li');
+//                     imageItem.innerText = item.name;
+//                     images.appendChild(imageItem);
 
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerText = "X";
-                    imageItem.appendChild(deleteBtn);
+//                     const deleteBtn = document.createElement('button');
+//                     deleteBtn.innerText = "X";
+//                     imageItem.appendChild(deleteBtn);
 
-                    deleteBtn.addEventListener('click', () => {
+//                     deleteBtn.addEventListener('click', () => {
 
-                        deleteObject(item).then(() => {
-                            console.log("USUNIĘTO!");
-                            images.removeChild(imageItem);
-                        })
-                    })
-                })
+//                         deleteObject(item).then(() => {
+//                             console.log("USUNIĘTO!");
+//                             images.removeChild(imageItem);
+//                         })
+//                     })
+//                 })
+//             })
+//         })
+//         albums.appendChild(listItem);
+//     })
+// })
+
+
+
+// ZADANIE 11 -15/04/2023
+// const addUserBtn = document.getElementById("addUser");
+// const userNameInput = document.getElementById("userName");
+// const userSurnameInput = document.getElementById("userSurname");
+// const collectionSelect = document.getElementById("select");
+
+// addUserBtn.addEventListener("click", () => {
+//     const userName = userNameInput.value;
+//     const userSurname = userSurnameInput.value;
+//     const collectionName = collectionSelect.value;
+
+//     const jkDoc = doc(db, `${collectionName}`, `Id${userName}${userSurname}`);
+//     setDoc(jkDoc, {
+//         name: userName,
+//         surname: userSurname
+//     }).then(()=>{
+//         userNameInput.value = "";
+//         userSurnameInput.value ="";
+//     });
+// })
+
+
+
+// ZADANIE 12 - 15/04/2023
+// const docIdInput = document.getElementById("docId");
+// const searchBtn = document.getElementById("searchBtn");
+// const dataHeader = document.getElementById("data");
+
+// searchBtn.addEventListener('click', () => {
+//     const docId = docIdInput.value;
+//     const myDoc = doc(db, "users", `${docId}`);
+//     getDoc(myDoc).then(docData => {
+//         if(docData.exists()){
+//             const data = docData.data();
+//             dataHeader.innerText = `name: ${data.name} 
+//             surname: ${data.surname}`
+//         }
+//         else{
+//             dataHeader.innerText = "Not found";
+//         }
+//     })
+// })
+
+
+
+// ZADANIE 13
+// const usersOrderedList = document.getElementById('usersList');
+
+// const usersColl = collection(db, "users");
+// getDocs(usersColl).then((dataDocs) => {
+//     dataDocs.docs.forEach(dataDoc => {
+//         const data = dataDoc.data();
+//         const li = document.createElement('li');
+//         li.innerText = `name: ${data.name}
+//         surname: ${data.surname}`;
+//         usersOrderedList.appendChild(li);
+//     })
+// })
+
+
+// ZADANIE 14
+// const usersOrderedList = document.getElementById('usersList');
+// const collectionNameSelect = document.getElementById("select");
+
+// collectionNameSelect.addEventListener("change", () => {
+//     const usersColl = collection(db, `${collectionNameSelect.value}`);
+//     usersOrderedList.innerHTML = "";
+//     getDocs(usersColl).then((dataDocs) => {
+//         dataDocs.docs.forEach(dataDoc => {
+//             const data = dataDoc.data();
+//             const li = document.createElement('li');
+//             li.innerText = `name: ${data.name}
+//             surname: ${data.surname}`;
+//             usersOrderedList.appendChild(li);
+//         })
+//     })
+// })
+
+// ZADANIE 15 - DELETE i EDIT
+const inputName = document.getElementById('name');
+const inputSurname = document.getElementById('surname');
+const addBtn = document.getElementById('addBtn');
+const usersList = document.getElementById("usersList");
+const usersCollection = collection(db, "users");
+let userEditRef;
+
+function displayUsers() {
+    getDocs(usersCollection).then(docsData => {
+        usersList.innerHTML = "";
+
+        docsData.docs.forEach((docData) => {
+            const userData = docData.data();
+            const deleteBtn = document.createElement("button");
+            const editBtn = document.createElement("button");
+            const li = document.createElement("li");
+
+            deleteBtn.addEventListener("click", () => {
+                deleteDoc(docData.ref).then(() => {
+                    displayUsers();
+                });
+            });
+
+            editBtn.addEventListener("click", () => {
+                inputName.value = userData.name;
+                inputSurname.value = userData.surname;
+                userEditRef = docData.ref;
             })
+
+
+            li.innerText = `${userData.name} ${userData.surname} `;
+            usersList.appendChild(li);
+            deleteBtn.innerText = "DELETE";
+            editBtn.innerText = "EDIT";
+            li.appendChild(deleteBtn);
+            li.appendChild(editBtn);
         })
-        albums.appendChild(listItem);
     })
+}
+
+displayUsers();
+
+addBtn.addEventListener("click", () => {
+    if(userEditRef){
+        updateDoc(userEditRef, {
+            name: `${inputName.value}`,
+            surname: `${inputSurname.value}`
+        }).then(() => {
+            displayUsers();
+            inputName.value = "";
+            inputSurname.value = "";
+            userEditRef = undefined;
+        })
+    }
+    else{
+        addDoc(usersCollection, {
+            name: `${inputName.value}`,
+            surname: `${inputSurname.value}`
+        }).then(() => {
+            displayUsers();
+            inputName.value = "";
+            inputSurname.value = "";
+        })
+    }
 })
+
+
+
