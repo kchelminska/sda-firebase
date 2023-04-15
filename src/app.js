@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from "firebase/storage";
 import './../styles/styles.css';
-import {updateDoc, addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc} from "firebase/firestore";
+import {updateDoc, addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc, query, where} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -406,71 +406,84 @@ const db = getFirestore(app);
 // })
 
 // ZADANIE 15 - DELETE i EDIT
-const inputName = document.getElementById('name');
-const inputSurname = document.getElementById('surname');
-const addBtn = document.getElementById('addBtn');
-const usersList = document.getElementById("usersList");
-const usersCollection = collection(db, "users");
-let userEditRef;
+// const inputName = document.getElementById('name');
+// const inputSurname = document.getElementById('surname');
+// const addBtn = document.getElementById('addBtn');
+// const usersList = document.getElementById("usersList");
+// const usersCollection = collection(db, "users");
+// let userEditRef;
 
-function displayUsers() {
-    getDocs(usersCollection).then(docsData => {
+// function displayUsers() {
+//     getDocs(usersCollection).then(docsData => {
+//         usersList.innerHTML = "";
+
+//         docsData.docs.forEach((docData) => {
+//             const userData = docData.data();
+//             const deleteBtn = document.createElement("button");
+//             const editBtn = document.createElement("button");
+//             const li = document.createElement("li");
+
+//             deleteBtn.addEventListener("click", () => {
+//                 deleteDoc(docData.ref).then(() => {
+//                     displayUsers();
+//                 });
+//             });
+//             editBtn.addEventListener("click", () => {
+//                 inputName.value = userData.name;
+//                 inputSurname.value = userData.surname;
+//                 userEditRef = docData.ref;
+//             })
+//             li.innerText = `${userData.name} ${userData.surname} `;
+//             usersList.appendChild(li);
+//             deleteBtn.innerText = "DELETE";
+//             editBtn.innerText = "EDIT";
+//             li.appendChild(deleteBtn);
+//             li.appendChild(editBtn);
+//         })
+//     })
+// }
+
+// displayUsers();
+
+// addBtn.addEventListener("click", () => {
+//     if(userEditRef){
+//         updateDoc(userEditRef, {
+//             name: `${inputName.value}`,
+//             surname: `${inputSurname.value}`
+//         }).then(() => {
+//             displayUsers();
+//             inputName.value = "";
+//             inputSurname.value = "";
+//             userEditRef = undefined;
+//         })
+//     }
+//     else{
+//         addDoc(usersCollection, {
+//             name: `${inputName.value}`,
+//             surname: `${inputSurname.value}`
+//         }).then(() => {
+//             displayUsers();
+//             inputName.value = "";
+//             inputSurname.value = "";
+//         })
+//     }
+// })
+
+// ZADANIE 16 - search 
+const nameInput = document.getElementById("name");
+const searchBtn = document.getElementById("searchBtn");
+const usersList = document.getElementById("users");
+
+searchBtn.addEventListener('click', () => {
+    const usersColl = collection(db, "users");
+    const usersQuery = query(usersColl, where("name", "==", nameInput.value));
+    getDocs(usersQuery).then((docsData) => {
         usersList.innerHTML = "";
-
         docsData.docs.forEach((docData) => {
-            const userData = docData.data();
-            const deleteBtn = document.createElement("button");
-            const editBtn = document.createElement("button");
-            const li = document.createElement("li");
-
-            deleteBtn.addEventListener("click", () => {
-                deleteDoc(docData.ref).then(() => {
-                    displayUsers();
-                });
-            });
-
-            editBtn.addEventListener("click", () => {
-                inputName.value = userData.name;
-                inputSurname.value = userData.surname;
-                userEditRef = docData.ref;
-            })
-
-
-            li.innerText = `${userData.name} ${userData.surname} `;
+            const user = docData.data();
+            const li = document.createElement('li');
+            li.innerText = docData.id;
             usersList.appendChild(li);
-            deleteBtn.innerText = "DELETE";
-            editBtn.innerText = "EDIT";
-            li.appendChild(deleteBtn);
-            li.appendChild(editBtn);
         })
     })
-}
-
-displayUsers();
-
-addBtn.addEventListener("click", () => {
-    if(userEditRef){
-        updateDoc(userEditRef, {
-            name: `${inputName.value}`,
-            surname: `${inputSurname.value}`
-        }).then(() => {
-            displayUsers();
-            inputName.value = "";
-            inputSurname.value = "";
-            userEditRef = undefined;
-        })
-    }
-    else{
-        addDoc(usersCollection, {
-            name: `${inputName.value}`,
-            surname: `${inputSurname.value}`
-        }).then(() => {
-            displayUsers();
-            inputName.value = "";
-            inputSurname.value = "";
-        })
-    }
-})
-
-
-
+});
