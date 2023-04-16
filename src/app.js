@@ -533,43 +533,6 @@ const rdb = getDatabase(app);
 // })
 
 // ZADANIE 18 - onChildAdd - na klikniecie przyciskiem wyslanie watrosci text z textarea jako message do baz danych jako "message"- wartosc pobierana z selecta
-// const userSelect = document.getElementById('user');
-// const messageTextArea = document.getElementById("message");
-// const sendBtn = document.getElementById("send");
-
-
-// // WYSYLANIE WIADOMOSCI
-// const messagesRef = refdb(rdb, "messages");
-// sendBtn.addEventListener('click', () => {
-//     const messageRef = push(messagesRef);
-//     set(messageRef, {
-//         user: userSelect.value,
-//         message: messageTextArea.value
-//     }).then(() => {
-//         messageTextArea.value = "";
-//     });
-// });
-
-// // WYSWIETLANIE WIADOMOSCI - snapshot jest nasza wiadomoscia
-// onChildAdded(messagesRef, (snapshot) => {
-//     const message = snapshot.val();
-
-//     const messageDiv = document.createElement('div');
-//     messageDiv.innerText = `${message.user}: ${message.text}`;
-//     document.body.appendChild(messageDiv);
-// })
-
-// const usersRef = refdb(rdb, "users");
-
-// onChildAdded(usersRef, (snapshot) => {
-//     const user = snapshot.val();
-
-//     const option = document.createElement("option");
-//     option.innerText = `${user.name} ${user.surname}`;
-
-//     userSelect.appendChild(option);
-// });
-
 
 const userSelect = document.getElementById("user");
 const messageTextArea = document.getElementById("message");
