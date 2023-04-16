@@ -2,22 +2,24 @@ import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from "firebase/storage";
 import './../styles/styles.css';
 import {updateDoc, addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc, query, where} from "firebase/firestore";
+import { getDatabase, ref as refdb, set } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCHi24P1mhch53g6QSCGMBnexF3GPztvzQ",
-  authDomain: "sda-firebase-876b0.firebaseapp.com",
-  projectId: "sda-firebase-876b0",
-  storageBucket: "sda-firebase-876b0.appspot.com",
-  messagingSenderId: "363216257570",
-  appId: "1:363216257570:web:b001f5e8db136c9126807b"
-};
+    apiKey: "AIzaSyCHi24P1mhch53g6QSCGMBnexF3GPztvzQ",
+    authDomain: "sda-firebase-876b0.firebaseapp.com",
+    databaseURL: "https://sda-firebase-876b0-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "sda-firebase-876b0",
+    storageBucket: "sda-firebase-876b0.appspot.com",
+    messagingSenderId: "363216257570",
+    appId: "1:363216257570:web:b001f5e8db136c9126807b"
+  };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 const db = getFirestore(app);
-
+const rdb = getDatabase(app);
 
 // ZADANIE PIERWSZE - PRZESYLANIE PLIKU NA CHMURE I WYSWIETLANIE GO W OKNIE PRZEGLADARKI
 // const btn = document.getElementById("mySend");
@@ -470,20 +472,35 @@ const db = getFirestore(app);
 // })
 
 // ZADANIE 16 - search 
-const nameInput = document.getElementById("name");
-const searchBtn = document.getElementById("searchBtn");
-const usersList = document.getElementById("users");
+// const nameInput = document.getElementById("name");
+// const searchBtn = document.getElementById("searchBtn");
+// const usersList = document.getElementById("users");
 
-searchBtn.addEventListener('click', () => {
-    const usersColl = collection(db, "users");
-    const usersQuery = query(usersColl, where("name", "==", nameInput.value));
-    getDocs(usersQuery).then((docsData) => {
-        usersList.innerHTML = "";
-        docsData.docs.forEach((docData) => {
-            const user = docData.data();
-            const li = document.createElement('li');
-            li.innerText = docData.id;
-            usersList.appendChild(li);
-        })
-    })
-});
+// searchBtn.addEventListener('click', () => {
+//     const usersColl = collection(db, "users");
+//     const usersQuery = query(usersColl, where("name", "==", nameInput.value));
+//     getDocs(usersQuery).then((docsData) => {
+//         usersList.innerHTML = "";
+//         docsData.docs.forEach((docData) => {
+//             const user = docData.data();
+//             const li = document.createElement('li');
+//             li.innerText = docData.id;
+//             usersList.appendChild(li);
+//         })
+//     })
+// });
+
+
+// REAL TIME DATABASE - BAZY DANYCH RZECZYWISTYCH 16042023
+const nameInput = document.getElementById("name");
+const surnameInput = document.getElementById("surname");
+const addBtn = document.getElementById("add");
+
+addBtn.addEventListener('click', () => {
+    
+    const janRef = refdb(rdb, `users/${nameInput.value}${surnameInput.value}`);
+    set(janRef, {
+        name: `${nameInput.value}`,
+        surname: `${surnameInput.value}`
+    });
+})
