@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from "firebase/storage";
 import './../styles/styles.css';
 import {updateDoc, addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc, query, where} from "firebase/firestore";
-import { getDatabase, ref as refdb, set } from "firebase/database";
+import { getDatabase, onValue, ref as refdb, set } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -492,15 +492,35 @@ const rdb = getDatabase(app);
 
 
 // REAL TIME DATABASE - BAZY DANYCH RZECZYWISTYCH 16042023
+// DODAWANIE DO BAZY DANYCH
 const nameInput = document.getElementById("name");
 const surnameInput = document.getElementById("surname");
 const addBtn = document.getElementById("add");
+const usersList = document.getElementById("users");
+
+
 
 addBtn.addEventListener('click', () => {
-    
-    const janRef = refdb(rdb, `users/${nameInput.value}${surnameInput.value}`);
-    set(janRef, {
-        name: `${nameInput.value}`,
-        surname: `${surnameInput.value}`
+    const name = nameInput.value;
+    const surname = surnameInput.value;
+
+    const userRef = refdb(rdb, `users/${name}${surname}`);
+    set(userRef, {
+        name: `${name}`,
+        surname: `${surname}`
+    }).then(() => {
+        nameInput.value = "";
+        surnameInput.value= "";
     });
+})
+
+const usersRef = refdb(rdb, "users");
+onValue(usersRef, (snapshot) => {
+    usersList.innerHTML = "";
+    snapshot.forEach((userSnapshot) => {
+        const user = userSnapshot.val();
+        const li = document.createElement('li');
+        li.innerText = `${user.name} ${user.surname}`;
+        usersList.appendChild(li);
+    })
 })
